@@ -3,6 +3,7 @@ package com.example.banque.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,8 +27,11 @@ public class SecurityConfig {
         http
                 // CORS en premier : le preflight OPTIONS (envoye sans identifiants) est accepte
                 .cors(withDefaults())
-                // toutes les requetes /api/** doivent etre authentifiees
+                // les regles sont lues dans l'ordre : la plus precise d'abord
                 .authorizeHttpRequests(authz -> authz
+                        // seul un conseiller valide un virement (ROLE_CONSEILLER)
+                        .requestMatchers(HttpMethod.POST, "/api/virements/*/valider").hasRole("CONSEILLER")
+                        // toutes les autres requetes /api/** doivent etre authentifiees
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 // pas de CSRF : API stateless, aucun cookie envoye automatiquement par le navigateur

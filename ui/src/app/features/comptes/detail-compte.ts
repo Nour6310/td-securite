@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { Banque, Compte, Virement } from '../../core/api/banque';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-detail-compte',
@@ -30,6 +31,9 @@ import { Banque, Compte, Virement } from '../../core/api/banque';
 })
 export class DetailCompte implements OnInit {
   private readonly banque = inject(Banque);
+  private readonly auth = inject(AuthService);
+  /** Confort d'affichage : le serveur refuse de toute facon (403) si ce n'est pas un conseiller. */
+  protected readonly estConseiller = computed(() => this.auth.utilisateur()?.roles.includes('CONSEILLER') ?? false);
 
   /** Le `:id` de la route (withComponentInputBinding). */
   readonly id = input.required<string>();
